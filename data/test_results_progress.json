@@ -1,0 +1,14 @@
+{
+  "total": 498,
+  "answered": 12,
+  "blocked": 4,
+  "errors": 0,
+  "scored": 16,
+  "correct": 6,
+  "accuracy": 0.375,
+  "status": "running",
+  "current_case": "test_017",
+  "completed": 16,
+  "percent": 3.21,
+  "elapsed_seconds": 272.4
+}
