@@ -1,0 +1,22 @@
+{
+  "total": 9,
+  "answered": 5,
+  "blocked": 0,
+  "errors": 0,
+  "scored": 5,
+  "correct": 4,
+  "accuracy": 0.8,
+  "prompt_only_scored": 5,
+  "prompt_only_correct": 4,
+  "prompt_only_accuracy": 0.8,
+  "fallback_used": 0,
+  "fallback_improved": 0,
+  "fallback_harmed": 0,
+  "action_mismatch_count": 0,
+  "needs_review_count": 0,
+  "status": "running",
+  "current_case": "test_006",
+  "completed": 5,
+  "percent": 55.56,
+  "elapsed_seconds": 40.6
+}

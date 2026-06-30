@@ -1,0 +1,23 @@
+{
+  "status": "completed",
+  "current_case": null,
+  "completed": 498,
+  "total": 498,
+  "percent": 100,
+  "elapsed_seconds": 881.9,
+  "answered": 315,
+  "blocked": 141,
+  "errors": 42,
+  "scored": 315,
+  "correct": 212,
+  "accuracy": 0.673,
+  "prompt_only_scored": 315,
+  "prompt_only_correct": 212,
+  "prompt_only_accuracy": 0.673,
+  "fallback_used": 0,
+  "fallback_improved": 0,
+  "fallback_harmed": 0,
+  "action_mismatch_count": 0,
+  "needs_review_count": 42,
+  "output_json": "D:\\vsCode\\AI\\system_prompt_INOUT\\data\\test_results_case1.json"
+}

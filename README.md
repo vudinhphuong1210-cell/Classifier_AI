@@ -2,10 +2,12 @@
 
 Luồng xử lý:
 
-1. Kiểm tra prompt injection và thiếu context.
-2. Nếu gặp một trong hai trường hợp trên, trả về `blocked` và không sinh câu trả lời.
-3. Nếu hợp lệ, gọi `qwen3-coder` sinh câu trả lời.
-4. Gửi cả input và câu trả lời vào bộ đánh giá APC 1.3 để lấy nhãn L0-L6.
+1. Gửi `student_prompt` trong một API request duy nhất.
+2. Model kiểm tra injection/thiếu context, đánh giá input, sinh answer và đánh giá
+   hành động của answer trong cùng response JSON.
+3. Resolver Python chọn `final_level`; answer chỉ được dùng khi prompt mơ hồ và
+   `answer_behavior_level` nằm trong `candidate_levels`.
+4. Ghi kết quả và tính accuracy.
 
 ## Cấu hình
 
@@ -15,15 +17,15 @@ Mở file `.env` và thay `sk-` bằng API key đầy đủ:
 QWEN_API_KEY=sk-...
 QWEN_BASE_URL=https://fvscode-proxy.iahn.hanoi.vn/v1
 QWEN_MODEL=qwen3-coder
-QWEN_REQUESTS_PER_MINUTE=30
+QWEN_REQUESTS_PER_MINUTE=0
 ```
 
 Chương trình tự đọc `.env`; không cần cài `python-dotenv`. File này đã được thêm
 vào `.gitignore` để tránh commit API key.
 
-Bộ đánh giá đọc trực tiếp toàn bộ nội dung `system_prompt_ver22.md` nằm cạnh
-`apc_qwen.py`. Chương trình sẽ dừng nếu không tìm thấy hoặc file prompt bị rỗng.
-Có thể chỉ định file khác bằng `--apc-prompt-file`.
+Chương trình đọc `system_prompt_ver22.md` nằm cạnh `apc_qwen.py`. Đây là system
+prompt one-request dùng chung cho guard, trả lời và đánh giá. Chương trình dừng nếu
+file này bị thiếu hoặc rỗng.
 
 ## Chạy
 
@@ -73,19 +75,29 @@ Mỗi phần tử trong `results` của file đầu ra có:
 
 - `user_input`: input người dùng.
 - `ai_answer`: câu trả lời do Qwen sinh.
-- `predicted_level`: nhãn APC do Qwen đánh giá từ input và câu trả lời.
+- `prompt_level`: nhãn đánh giá riêng từ input.
+- `prompt_ambiguous`: input có thực sự mơ hồ giữa hai level hay không.
+- `candidate_levels`: một hoặc hai level có bằng chứng từ input.
+- `answer_behavior_level`: hành động AI thực tế đã làm.
+- `answer_matches_request`: hành động AI có khớp yêu cầu không.
+- `final_level` / `predicted_level`: nhãn do resolver Python chọn.
+- `decision_source`: nguồn quyết định final.
+- `action_mismatch`: AI có thực hiện khác yêu cầu không.
+- `needs_review`: case cần người kiểm tra.
 - `expected_level`: nhãn chuẩn trong dataset.
 - `is_correct`: kết quả so sánh nhãn dự đoán với nhãn chuẩn.
 - `status`: `answered`, `blocked` hoặc `error`.
 
-`summary.accuracy` là tỷ lệ dự đoán đúng trên các test case có nhãn kỳ vọng.
+Summary gồm `accuracy`, `prompt_only_accuracy`, `fallback_used`,
+`fallback_improved`, `fallback_harmed`, `action_mismatch_count` và
+`needs_review_count`.
 Kết quả được ghi lại sau từng test case để giữ dữ liệu nếu API lỗi giữa chừng.
 
 ## Giới hạn request
 
-Mặc định chương trình giới hạn tổng cộng 30 API request trong mỗi cửa sổ 60 giây.
-Giới hạn áp dụng chung cho cả bước kiểm tra, sinh câu trả lời và đánh giá APC.
-Khi đạt giới hạn, chương trình tự chờ và tiếp tục.
+Mặc định chương trình không giới hạn số API request (mặc định: 0).
+Mỗi student prompt dùng đúng một API request, kể cả prompt bị block.
+Khi đặt một giới hạn khác 0 và đạt giới hạn đó, chương trình tự chờ và tiếp tục.
 
 Có thể thay đổi bằng `.env` hoặc tham số:
 
